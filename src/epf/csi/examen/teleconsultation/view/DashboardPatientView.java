@@ -1,18 +1,19 @@
 package epf.csi.examen.teleconsultation.view;
 
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.Node;
 
 public class DashboardPatientView {
+
     private Button carnetButton = new Button("Carnet de santé");
     private Button rdvButton = new Button("Prendre un rendez-vous");
     private Button prescriptionButton = new Button("Mes prescriptions");
     private Button teleconsultationButton = new Button("Téléconsultation");
 
-    public Scene getScene() {
+    public Node getView() {
         BorderPane root = new BorderPane();
         Label title = new Label("Bienvenue sur CareLinker - Patient");
         title.setStyle("-fx-font-size: 18px; -fx-padding: 10px;");
@@ -23,7 +24,7 @@ public class DashboardPatientView {
         root.setTop(title);
         root.setCenter(centerBox);
 
-        return new Scene(root, 600, 400);
+        return root;
     }
 
     public Button getCarnetButton() { return carnetButton; }

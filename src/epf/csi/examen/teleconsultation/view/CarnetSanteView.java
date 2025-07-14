@@ -1,31 +1,27 @@
 package epf.csi.examen.teleconsultation.view;
 
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.Node;
 
 public class CarnetSanteView {
-    private TextArea historiqueText = new TextArea();
-    private Button actualiserButton = new Button("Actualiser");
 
-    public Scene getScene() {
-        VBox root = new VBox(15);
-        root.setPadding(new Insets(30));
-        root.setAlignment(Pos.CENTER_LEFT);
+    public Node getView() {
+        BorderPane root = new BorderPane();
+        Label title = new Label("Mon Carnet de Santé");
+        title.setStyle("-fx-font-size: 18px; -fx-padding: 10px;");
 
-        Label title = new Label("Carnet de santé");
-        title.setStyle("-fx-font-size: 18px;");
+        VBox content = new VBox(10);
+        content.setAlignment(Pos.CENTER);
+        content.getChildren().addAll(
+            new Label("Aucune donnée médicale pour l'instant.")
+        );
 
-        historiqueText.setPromptText("Historique médical...");
-        historiqueText.setPrefSize(500, 300);
-        historiqueText.setEditable(false);
+        root.setTop(title);
+        root.setCenter(content);
 
-        root.getChildren().addAll(title, historiqueText, actualiserButton);
-        return new Scene(root, 600, 400);
+        return root;
     }
-
-    public TextArea getHistoriqueText() { return historiqueText; }
-    public Button getActualiserButton() { return actualiserButton; }
 }
