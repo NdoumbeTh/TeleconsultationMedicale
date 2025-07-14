@@ -18,7 +18,7 @@ public class Main extends Application {
         mainScene = new Scene(root, 900, 600);
 
         // Écran d'accueil qui laisse choisir le rôle
-        AccueilView accueilView = new AccueilView(this);
+        AccueilView accueilView = new AccueilView();
         root.setCenter(accueilView.getView());
 
         primaryStage.setTitle("CareLinker - Plateforme de téléconsultation");
@@ -51,6 +51,7 @@ public class Main extends Application {
             btnDashboard.setOnAction(e -> root.setCenter(new DashboardPatientView().getView()));
             btnRdv.setOnAction(e -> root.setCenter(new RendezVousView().getView()));
             btnCarnet.setOnAction(e -> root.setCenter(new CarnetSanteView().getView()));
+            btnCarnet.setOnAction(e -> root.setCenter(new AccueilView().getView()));
             btnPrescription.setOnAction(e -> root.setCenter(new PrescriptionView().getView()));
             
             navBar.getChildren().addAll(btnDashboard, btnRdv, btnCarnet, btnPrescription);
@@ -125,7 +126,7 @@ public class Main extends Application {
 
     public void afficherAccueil() {
         root.setTop(null);
-        root.setCenter(new AccueilView(this).getView());
+        root.setCenter(new AccueilView().getView());
     }
 
     public static void main(String[] args) {
