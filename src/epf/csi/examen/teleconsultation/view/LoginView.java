@@ -1,31 +1,30 @@
 package epf.csi.examen.teleconsultation.view;
 
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
+import epf.csi.examen.teleconsultation.controller.AuthController;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
 
-public class LoginView {
-    private TextField emailField = new TextField();
-    private PasswordField passwordField = new PasswordField();
-    private Button loginButton = new Button("Se connecter");
-    private Hyperlink signupLink = new Hyperlink("Créer un compte");
+public class LoginView extends VBox {
+    public LoginView(Stage primaryStage) {
+        AuthController authController = new AuthController();
 
-    public Scene getScene() {
-        VBox root = new VBox(10);
-        root.setPadding(new Insets(40));
-        Label title = new Label("Connexion - CareLinker");
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-
+        TextField emailField = new TextField();
         emailField.setPromptText("Email");
+
+        PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Mot de passe");
 
-        root.getChildren().addAll(title, emailField, passwordField, loginButton, signupLink);
-        return new Scene(root, 400, 300);
-    }
+        Button loginBtn = new Button("Se connecter");
+        loginBtn.setOnAction(e -> {
+            authController.connexion(
+                emailField.getText(),
+                passwordField.getText(),
+                primaryStage
+            );
+        });
 
-    public TextField getEmailField() { return emailField; }
-    public PasswordField getPasswordField() { return passwordField; }
-    public Button getLoginButton() { return loginButton; }
-    public Hyperlink getSignupLink() { return signupLink; }
+        getChildren().addAll(emailField, passwordField, loginBtn);
+        setSpacing(10);
+    }
 }

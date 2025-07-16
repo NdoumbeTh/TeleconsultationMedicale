@@ -1,28 +1,32 @@
 package epf.csi.examen.teleconsultation.view;
 
+import epf.csi.examen.teleconsultation.main.Main;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.scene.Node;
 
 public class AccueilView {
+    private VBox root;
 
-    private Button btnPatient = new Button("Se connecter en tant que Patient");
-    private Button btnMedecin = new Button("Se connecter en tant que Médecin");
-    private Button btnAdmin = new Button("Se connecter en tant qu'Administrateur");
+    public AccueilView(Main mainApp) {
+        root = new VBox(20);
+        root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-padding: 30;");
 
-    public Node getView() {
         Label title = new Label("Bienvenue sur CareLinker");
-        title.setStyle("-fx-font-size: 20px; -fx-padding: 20px;");
+        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-        VBox vbox = new VBox(20, title, btnPatient, btnMedecin, btnAdmin);
-        vbox.setAlignment(Pos.CENTER);
+        Button patientBtn = new Button("Je suis un Patient");
+        Button medecinBtn = new Button("Je suis un Médecin");
+        Button adminBtn = new Button("Je suis un Administrateur");
 
-        return vbox;
+
+        root.getChildren().addAll(title, patientBtn, medecinBtn, adminBtn);
     }
 
-    public Button getBtnPatient() { return btnPatient; }
-    public Button getBtnMedecin() { return btnMedecin; }
-    public Button getBtnAdmin() { return btnAdmin; }
+    public Node getView() {
+        return root;
+    }
 }

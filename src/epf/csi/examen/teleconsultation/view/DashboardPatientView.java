@@ -5,30 +5,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 
-public class DashboardPatientView {
+public class DashboardPatientView {    
+	private VBox root;
 
-    private Button carnetButton = new Button("Carnet de santé");
-    private Button rdvButton = new Button("Prendre un rendez-vous");
-    private Button prescriptionButton = new Button("Mes prescriptions");
-    private Button teleconsultationButton = new Button("Téléconsultation");
+public DashboardPatientView() {
+    root = new VBox();
+    root.setSpacing(20);
+    root.getChildren().add(new Label("Bienvenue dans le Dashboard Admin"));
+}
 
-    public Node getView() {
-        BorderPane root = new BorderPane();
-        Label title = new Label("Bienvenue sur CareLinker - Patient");
-        title.setStyle("-fx-font-size: 18px; -fx-padding: 10px;");
+public Parent getView() {
+    return root;
 
-        VBox centerBox = new VBox(10, carnetButton, rdvButton, prescriptionButton, teleconsultationButton);
-        centerBox.setAlignment(Pos.CENTER);
-
-        root.setTop(title);
-        root.setCenter(centerBox);
-
-        return root;
-    }
-
-    public Button getCarnetButton() { return carnetButton; }
-    public Button getRdvButton() { return rdvButton; }
-    public Button getPrescriptionButton() { return prescriptionButton; }
-    public Button getTeleconsultationButton() { return teleconsultationButton; }
+}
 }
