@@ -10,6 +10,8 @@ import javafx.stage.Stage;
 
 public class RegisterView {
     private AuthController authController;
+    private VBox root; // Ajoutez en haut
+
 
     public RegisterView(Stage stage) {
         this.authController = new AuthController();
@@ -30,9 +32,7 @@ public class RegisterView {
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Mot de passe");
 
-        ComboBox<String> roleComboBox = new ComboBox<>();
-        roleComboBox.getItems().addAll("patient", "medecin");
-        roleComboBox.setPromptText("Choisir un rôle");
+
 
         Button registerButton = new Button("S'inscrire");
 
@@ -40,14 +40,18 @@ public class RegisterView {
 
         Hyperlink loginLink = new Hyperlink("Déjà un compte ? Se connecter");
         loginLink.setOnAction(e -> {
-            new LoginView(stage); // Affiche la page de connexion
+            LoginView loginView = new LoginView(stage);
+            Scene loginScene = new Scene(loginView.getView(), 400, 300);
+            stage.setScene(loginScene);
         });
+
 
         registerButton.setOnAction(e -> {
             String nom = nomField.getText().trim();
             String email = emailField.getText().trim();
             String mdp = passwordField.getText();
-            String role = roleComboBox.getValue();
+            String role = "patient"; // Rôle imposé
+
 
             if (nom.isEmpty() || email.isEmpty() || mdp.isEmpty() || role == null) {
                 messageLabel.setText("Veuillez remplir tous les champs.");
@@ -62,7 +66,7 @@ public class RegisterView {
             }
         });
 
-        root.getChildren().addAll(titre, nomField, emailField, passwordField, roleComboBox, registerButton, messageLabel, loginLink);
+        root.getChildren().addAll(titre, nomField, emailField, passwordField, registerButton, messageLabel, loginLink);
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -71,7 +75,6 @@ public class RegisterView {
     }
 
     public VBox getView() {
-        // Optionnel si vous voulez injecter la vue ailleurs
-        return null;
+        return root;
     }
 }

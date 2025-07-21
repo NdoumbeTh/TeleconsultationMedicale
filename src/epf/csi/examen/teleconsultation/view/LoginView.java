@@ -2,6 +2,7 @@ package epf.csi.examen.teleconsultation.view;
 
 import epf.csi.examen.teleconsultation.controller.AuthController;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -9,10 +10,11 @@ import javafx.stage.Stage;
 
 public class LoginView {
     private AuthController authController;
+    private VBox root;
 
     public LoginView(Stage stage) {
         this.authController = new AuthController();
-        VBox root = new VBox(10);
+        root = new VBox(10); // ⚠️ CORRIGÉ ICI
         root.setAlignment(Pos.CENTER);
         root.setPrefSize(400, 300);
 
@@ -41,15 +43,9 @@ public class LoginView {
         });
 
         root.getChildren().addAll(titre, emailField, passwordField, loginButton, message, registerLink);
-
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Connexion");
-        stage.show();
     }
 
-    public VBox getView() {
-        // Pour accéder à la vue depuis un autre point (optionnel)
-        return null; // inutilisé ici
+    public Parent getView() {
+        return root;
     }
 }
