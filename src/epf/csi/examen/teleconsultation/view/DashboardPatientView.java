@@ -13,7 +13,7 @@ public class DashboardPatientView {
 public DashboardPatientView() {
     root = new VBox();
     root.setSpacing(20);
-    root.getChildren().add(new Label("Bienvenue dans le Dashboard Admin"));
+    root.getChildren().add(new Label("Bienvenue dans le Dashboard Patient"));
 }
 
 public Parent getView() {

@@ -15,7 +15,7 @@ public class DashboardMedecinView {
     public DashboardMedecinView() {
         root = new VBox();
         root.setSpacing(20);
-        root.getChildren().add(new Label("Bienvenue dans le Dashboard Admin"));
+        root.getChildren().add(new Label("Bienvenue dans le Dashboard Medecin"));
     }
 
     public Parent getView() {
