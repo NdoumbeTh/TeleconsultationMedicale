@@ -368,4 +368,22 @@ public class UtilisateurDAO {
             e.printStackTrace();
         }
     }
+ // Lister les patients liés à un médecin via les consultations
+    public List<Utilisateur> listerPatientsParMedecin(int medecinId) throws SQLException {
+        List<Utilisateur> patients = new ArrayList<>();
+        String sql = "SELECT DISTINCT u.* FROM utilisateurs u " +
+                     "JOIN consultations c ON u.id = c.id_patient " +
+                     "WHERE c.id_medecin = ? AND u.role = 'patient'";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, medecinId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    patients.add(mapResultSetToUtilisateur(rs));
+                }
+            }
+        }
+        return patients;
+    }
+
 }

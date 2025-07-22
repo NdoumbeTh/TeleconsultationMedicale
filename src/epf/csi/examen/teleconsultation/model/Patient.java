@@ -1,30 +1,38 @@
 package epf.csi.examen.teleconsultation.model;
 
-public class Patient {
-    private int id;
-    private String nom;
-    private String prenom;
-    private String email;
-    private String numeroTel;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
-    public Patient(int id, String nom, String prenom, String email, String numeroTel) {
-        this.id = id;
-        this.nom = nom;
-        this.prenom = prenom;
-        this.email = email;
-        this.numeroTel = numeroTel;
+public class Patient {
+    private final StringProperty nom = new SimpleStringProperty();
+    private final StringProperty prenom = new SimpleStringProperty();
+
+    public Patient(String nom, String prenom) {
+        this.nom.set(nom);
+        this.prenom.set(prenom);
     }
 
-    // Getters et Setters
-    public int getId() { return id; }
-    public String getNom() { return nom; }
-    public String getPrenom() { return prenom; }
-    public String getEmail() { return email; }
-    public String getNumeroTel() { return numeroTel; }
+    public StringProperty nomProperty() {
+        return nom;
+    }
 
-    public void setId(int id) { this.id = id; }
-    public void setNom(String nom) { this.nom = nom; }
-    public void setPrenom(String prenom) { this.prenom = prenom; }
-    public void setEmail(String email) { this.email = email; }
-    public void setNumeroTel(String numeroTel) { this.numeroTel = numeroTel; }
+    public StringProperty prenomProperty() {
+        return prenom;
+    }
+
+    public String getNom() {
+        return nom.get();
+    }
+
+    public void setNom(String nom) {
+        this.nom.set(nom);
+    }
+
+    public String getPrenom() {
+        return prenom.get();
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom.set(prenom);
+    }
 }

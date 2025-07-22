@@ -39,37 +39,38 @@ public class AuthController {
         }
     }
 
-    public void connexion(String email, String motDePasse, Stage primaryStage) {
-        try (Connection connection = DBConnection.getConnection()) {
-            UtilisateurDAO utilisateurDAO = new UtilisateurDAO(connection);
+public void connexion(String email, String motDePasse, Stage primaryStage) {
+    try (Connection connection = DBConnection.getConnection()) {
+        UtilisateurDAO utilisateurDAO = new UtilisateurDAO(connection);
+        
+        Utilisateur utilisateur = utilisateurDAO.findByEmailAndPassword(email, motDePasse);
+        
+        if (utilisateur != null) {
+            System.out.println("Connexion réussie pour : " + utilisateur.getNom() + " (" + utilisateur.getRole() + ")");
             
-            Utilisateur utilisateur = utilisateurDAO.findByEmailAndPassword(email, motDePasse);
-            
-            if (utilisateur != null) {
-                System.out.println("Connexion réussie pour : " + utilisateur.getNom() + " (" + utilisateur.getRole() + ")");
-                
-                switch (utilisateur.getRole().toLowerCase()) {
-                    case "admin":
-                        new DashboardAdminView(primaryStage);
-                        break;
-                    case "medecin":
-                        new DashboardMedecinView(primaryStage);
-                        break;
-                    case "patient":
-                        new DashboardPatientView(primaryStage);
-                        break;
-                    default:
-                        System.err.println("Rôle non reconnu : " + utilisateur.getRole());
-                }
-            } else {
-                System.err.println("Email ou mot de passe incorrect.");
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Erreur lors de la connexion : " + e.getMessage());
-            e.printStackTrace();
+            switch (utilisateur.getRole().toLowerCase()) {
+            case "admin":
+                new DashboardAdminView(primaryStage);
+                break;
+            case "medecin":
+                new DashboardMedecinView(primaryStage, utilisateur.getId());  // <-- ajouter id medecin
+                break;
+            case "patient":
+                new DashboardPatientView(primaryStage);
+                break;
+            default:
+                System.err.println("Rôle non reconnu : " + utilisateur.getRole());
         }
+
+        } else {
+            System.err.println("Email ou mot de passe incorrect.");
+        }
+        
+    } catch (SQLException e) {
+        System.err.println("Erreur lors de la connexion : " + e.getMessage());
+        e.printStackTrace();
     }
+}
 
     // Méthode utilitaire pour vérifier si un utilisateur existe
     public boolean utilisateurExiste(String email) {
