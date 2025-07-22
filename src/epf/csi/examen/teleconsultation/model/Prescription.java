@@ -1,32 +1,38 @@
 package epf.csi.examen.teleconsultation.model;
 
+import javafx.beans.property.*;
+
 import java.time.LocalDate;
 
 public class Prescription {
-    private int id;
-    private int patientId;
-    private int medecinId;
-    private String contenu;
-    private LocalDate date;
+    private IntegerProperty id = new SimpleIntegerProperty();
+    private ObjectProperty<LocalDate> date = new SimpleObjectProperty<>();
+    private StringProperty medicaments = new SimpleStringProperty();
+    private StringProperty remarques = new SimpleStringProperty();
+    private IntegerProperty patientId = new SimpleIntegerProperty();
+    private IntegerProperty medecinId = new SimpleIntegerProperty();
 
-    public Prescription(int id, int patientId, int medecinId, String contenu, LocalDate date) {
-        this.id = id;
-        this.patientId = patientId;
-        this.medecinId = medecinId;
-        this.contenu = contenu;
-        this.date = date;
-    }
+    public int getId() { return id.get(); }
+    public void setId(int id) { this.id.set(id); }
+    public IntegerProperty idProperty() { return id; }
 
-    // Getters et Setters
-    public int getId() { return id; }
-    public int getPatientId() { return patientId; }
-    public int getMedecinId() { return medecinId; }
-    public String getContenu() { return contenu; }
-    public LocalDate getDate() { return date; }
+    public LocalDate getDate() { return date.get(); }
+    public void setDate(LocalDate date) { this.date.set(date); }
+    public ObjectProperty<LocalDate> dateProperty() { return date; }
 
-    public void setId(int id) { this.id = id; }
-    public void setPatientId(int patientId) { this.patientId = patientId; }
-    public void setMedecinId(int medecinId) { this.medecinId = medecinId; }
-    public void setContenu(String contenu) { this.contenu = contenu; }
-    public void setDate(LocalDate date) { this.date = date; }
+    public String getMedicaments() { return medicaments.get(); }
+    public void setMedicaments(String medicaments) { this.medicaments.set(medicaments); }
+    public StringProperty medicamentsProperty() { return medicaments; }
+
+    public String getRemarques() { return remarques.get(); }
+    public void setRemarques(String remarques) { this.remarques.set(remarques); }
+    public StringProperty remarquesProperty() { return remarques; }
+
+    public int getPatientId() { return patientId.get(); }
+    public void setPatientId(int patientId) { this.patientId.set(patientId); }
+    public IntegerProperty patientIdProperty() { return patientId; }
+
+    public int getMedecinId() { return medecinId.get(); }
+    public void setMedecinId(int medecinId) { this.medecinId.set(medecinId); }
+    public IntegerProperty medecinIdProperty() { return medecinId; }
 }

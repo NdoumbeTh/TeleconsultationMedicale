@@ -1,37 +1,79 @@
 package epf.csi.examen.teleconsultation.model;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import javafx.beans.property.*;
+import java.time.LocalDateTime;
 
 public class RendezVous {
-    private int id;
-    private int patientId;
-    private int medecinId;
-    private LocalDate date;
-    private LocalTime heure;
-    private String statut;
 
-    public RendezVous(int id, int patientId, int medecinId, LocalDate date, LocalTime heure, String statut) {
-        this.id = id;
-        this.patientId = patientId;
-        this.medecinId = medecinId;
-        this.date = date;
-        this.heure = heure;
-        this.statut = statut;
+    private final IntegerProperty id;
+    private final IntegerProperty patientId;
+    private final IntegerProperty medecinId;
+    private final ObjectProperty<LocalDateTime> dateHeure;
+    private final StringProperty statut;
+
+    // Constructeur complet
+    public RendezVous(int id, int patientId, int medecinId, LocalDateTime dateHeure, String statut) {
+        this.id = new SimpleIntegerProperty(id);
+        this.patientId = new SimpleIntegerProperty(patientId);
+        this.medecinId = new SimpleIntegerProperty(medecinId);
+        this.dateHeure = new SimpleObjectProperty<>(dateHeure);
+        this.statut = new SimpleStringProperty(statut);
     }
 
-    // Getters et Setters
-    public int getId() { return id; }
-    public int getPatientId() { return patientId; }
-    public int getMedecinId() { return medecinId; }
-    public LocalDate getDate() { return date; }
-    public LocalTime getHeure() { return heure; }
-    public String getStatut() { return statut; }
+    // Constructeur simplifié (sans id)
+    public RendezVous(int patientId, int medecinId, LocalDateTime dateHeure, String statut) {
+        this(0, patientId, medecinId, dateHeure, statut);
+    }
 
-    public void setId(int id) { this.id = id; }
-    public void setPatientId(int patientId) { this.patientId = patientId; }
-    public void setMedecinId(int medecinId) { this.medecinId = medecinId; }
-    public void setDate(LocalDate date) { this.date = date; }
-    public void setHeure(LocalTime heure) { this.heure = heure; }
-    public void setStatut(String statut) { this.statut = statut; }
+    // Getters & setters JavaFX properties
+
+    public int getId() {
+        return id.get();
+    }
+    public IntegerProperty idProperty() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id.set(id);
+    }
+
+    public int getPatientId() {
+        return patientId.get();
+    }
+    public IntegerProperty patientIdProperty() {
+        return patientId;
+    }
+    public void setPatientId(int patientId) {
+        this.patientId.set(patientId);
+    }
+
+    public int getMedecinId() {
+        return medecinId.get();
+    }
+    public IntegerProperty medecinIdProperty() {
+        return medecinId;
+    }
+    public void setMedecinId(int medecinId) {
+        this.medecinId.set(medecinId);
+    }
+
+    public LocalDateTime getDateHeure() {
+        return dateHeure.get();
+    }
+    public ObjectProperty<LocalDateTime> dateHeureProperty() {
+        return dateHeure;
+    }
+    public void setDateHeure(LocalDateTime dateHeure) {
+        this.dateHeure.set(dateHeure);
+    }
+
+    public String getStatut() {
+        return statut.get();
+    }
+    public StringProperty statutProperty() {
+        return statut;
+    }
+    public void setStatut(String statut) {
+        this.statut.set(statut);
+    }
 }

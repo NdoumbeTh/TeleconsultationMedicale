@@ -53,14 +53,14 @@ public void connexion(String email, String motDePasse, Stage primaryStage) {
                 new DashboardAdminView(primaryStage);
                 break;
             case "medecin":
-                new DashboardMedecinView(primaryStage, utilisateur.getId());  // <-- ajouter id medecin
+                new DashboardMedecinView(primaryStage, utilisateur);  // <-- ici
                 break;
             case "patient":
                 new DashboardPatientView(primaryStage);
                 break;
             default:
                 System.err.println("Rôle non reconnu : " + utilisateur.getRole());
-        }
+            }
 
         } else {
             System.err.println("Email ou mot de passe incorrect.");
