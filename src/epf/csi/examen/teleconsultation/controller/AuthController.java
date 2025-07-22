@@ -56,7 +56,7 @@ public void connexion(String email, String motDePasse, Stage primaryStage) {
                 new DashboardMedecinView(primaryStage, utilisateur);  // <-- ici
                 break;
             case "patient":
-                new DashboardPatientView(primaryStage);
+                new DashboardPatientView(utilisateur.getId()).start(primaryStage);
                 break;
             default:
                 System.err.println("Rôle non reconnu : " + utilisateur.getRole());

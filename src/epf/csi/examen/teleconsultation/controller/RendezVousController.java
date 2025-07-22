@@ -59,4 +59,14 @@ public class RendezVousController {
             return Collections.emptyList();
         }
     }
+    public List<RendezVous> listerRendezVousPatient(int patientId) {
+        try (Connection connection = DBConnection.getConnection()) {
+            RendezVousDAO rdvDAO = new RendezVousDAO(connection);
+            return rdvDAO.listerRendezVousPatient(patientId);
+        } catch (SQLException e) {
+            System.err.println("Erreur récupération rendez-vous patient : " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
 }

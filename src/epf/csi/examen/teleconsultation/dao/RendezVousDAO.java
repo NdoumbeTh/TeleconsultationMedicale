@@ -97,4 +97,18 @@ public class RendezVousDAO {
 
         return new RendezVous(id, patientId, medecinId, dateHeure, statut);
     }
+    public List<RendezVous> listerRendezVousPatient(int patientId) throws SQLException {
+        List<RendezVous> list = new ArrayList<>();
+        String sql = "SELECT * FROM rendez_vous WHERE patient_id = ? ORDER BY date_heure DESC";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, patientId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToRendezVous(rs));
+                }
+            }
+        }
+        return list;
+    }
+
 }
