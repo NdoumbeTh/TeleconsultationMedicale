@@ -43,6 +43,7 @@ public class DashboardMedecinView {
         Button btnNouvelleConsultation = new Button("Nouvelle consultation");
         Button btnRendezVous = new Button("Mes rendez-vous");
         Button btnPrescriptions = new Button("Mes ordonnances");
+        Button btnMessagerie = new Button("Messagerie");
         Button btnDeconnexion = new Button("Déconnexion");
 
         menu.getChildren().addAll(
@@ -50,6 +51,7 @@ public class DashboardMedecinView {
             btnNouvelleConsultation,
             btnRendezVous,
             btnPrescriptions,
+            btnMessagerie,
             btnDeconnexion
         );
 
@@ -75,6 +77,10 @@ public class DashboardMedecinView {
             PrescriptionView prescriptionView = new PrescriptionView();
             prescriptionView.start(stage, medecin);  // <-- on passe l'objet Utilisateur complet
         });
+        btnMessagerie.setOnAction(e -> {
+            new MessageMedecinView(medecin.getId(), stage, this);
+        });
+
 
         btnDeconnexion.setOnAction(e -> stage.close());
 

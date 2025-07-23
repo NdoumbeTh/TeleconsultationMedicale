@@ -385,5 +385,39 @@ public class UtilisateurDAO {
         }
         return patients;
     }
+    public List<Utilisateur> listerUtilisateursParRole(String role) {
+        List<Utilisateur> utilisateurs = new ArrayList<>();
+        String sql = "SELECT * FROM utilisateurs WHERE role = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, role);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    utilisateurs.add(mapResultSetToUtilisateur(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return utilisateurs;
+    }
+    public List<Utilisateur> getDestinatairesConversations(int userId) {
+        List<Utilisateur> interlocuteurs = new ArrayList<>();
+        String sql = "SELECT DISTINCT u.* FROM utilisateurs u " +
+                     "JOIN messages m ON (u.id = m.expediteur_id OR u.id = m.destinataire_id) " +
+                     "WHERE (m.expediteur_id = ? OR m.destinataire_id = ?) AND u.id != ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    interlocuteurs.add(mapResultSetToUtilisateur(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return interlocuteurs;
+    }
 
 }

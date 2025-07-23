@@ -117,4 +117,23 @@ public class ConsultationDAO {
 
         return new Consultation(id, idPatient, idMedecin, dateHeure, type, statut, motif, nomPatient, nomMedecin);
     }
+    public List<Consultation> listerConsultationsPatient(int idPatient) throws SQLException {
+        List<Consultation> consultations = new ArrayList<>();
+        String sql = "SELECT c.*, p.nom AS nom_patient, m.nom AS nom_medecin " +
+                     "FROM consultations c " +
+                     "JOIN utilisateurs p ON c.id_patient = p.id " +
+                     "JOIN utilisateurs m ON c.id_medecin = m.id " +
+                     "WHERE c.id_patient = ? " +
+                     "ORDER BY c.date_heure DESC";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idPatient);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    consultations.add(mapResultSetToConsultation(rs));
+                }
+            }
+        }
+        return consultations;
+    }
+
 }

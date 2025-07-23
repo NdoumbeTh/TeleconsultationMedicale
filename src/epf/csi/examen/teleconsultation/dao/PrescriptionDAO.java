@@ -44,4 +44,24 @@ public class PrescriptionDAO {
         }
         return prescriptions;
     }
+    public List<Prescription> getPrescriptionsByPatient(int patientId) throws SQLException {
+        List<Prescription> prescriptions = new ArrayList<>();
+        String sql = "SELECT * FROM prescriptions WHERE patient_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, patientId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Prescription p = new Prescription();
+                p.setId(rs.getInt("id"));
+                p.setDate(rs.getDate("date").toLocalDate());
+                p.setMedicaments(rs.getString("medicaments"));
+                p.setRemarques(rs.getString("remarques"));
+                p.setPatientId(rs.getInt("patient_id"));
+                p.setMedecinId(rs.getInt("medecin_id"));
+                prescriptions.add(p);
+            }
+        }
+        return prescriptions;
+    }
+
 }

@@ -5,6 +5,7 @@ import epf.csi.examen.teleconsultation.model.RendezVous;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -25,31 +26,60 @@ public class DashboardPatientView {
         this.patientId = patientId;
     }
 
-    public void start(Stage stage) {
-        BorderPane root = new BorderPane();
+public void start(Stage stage) {
+    BorderPane root = new BorderPane();
 
-        Label title = new Label("Mes Rendez-vous");
-        title.setStyle("-fx-font-size: 20px; -fx-padding: 10;");
+    // Titre à gauche
+    Label title = new Label("Mes Rendez-vous");
+    title.setStyle("-fx-font-size: 20px; -fx-padding: 10;");
 
-        tableView = new TableView<>();
-        setupTableColumns();
+    // Boutons à droite
+    Button btnNouveauRDV = new Button("Prendre un nouveau rendez-vous");
+    btnNouveauRDV.setOnAction(e -> openPriseRDVForm());
 
-        Button btnNouveauRDV = new Button("Prendre un nouveau rendez-vous");
-        btnNouveauRDV.setOnAction(e -> openPriseRDVForm());
+    Button btnOrdonnances = new Button("Voir mes ordonnances");
+    btnOrdonnances.setOnAction(e -> new PrescriptionPatientView().start(new Stage(), patientId));
+    
+    Button btnConsultations = new Button("Voir mes consultations");
+    btnConsultations.setOnAction(e -> {
+        new ConsultationPatientView(patientId).start(new Stage());
+    });
+    Button btnMessages = new Button("Messagerie");
+    btnMessages.setOnAction(e -> {
+        // Vous pouvez améliorer ça si vous avez un système pour retrouver l’ID du médecin principal du patient
+        int medecinId = 1; // <-- Remplacez par le bon ID si dynamique
+        MessageriePatientView vue = new MessageriePatientView(patientId, medecinId);
+        vue.start(new Stage());
+    });
 
-        HBox topBox = new HBox(10, title, btnNouveauRDV);
-        topBox.setPadding(new Insets(10));
 
-        root.setTop(topBox);
-        root.setCenter(tableView);
+    
 
-        refreshTable();
 
-        Scene scene = new Scene(root, 700, 400);
-        stage.setScene(scene);
-        stage.setTitle("Dashboard Patient");
-        stage.show();
-    }
+    // Conteneur horizontal haut : Titre à gauche, boutons à droite
+    HBox leftBox = new HBox(title);
+    HBox rightBox = new HBox(10, btnNouveauRDV, btnOrdonnances, btnConsultations,btnMessages);
+    leftBox.setAlignment(Pos.CENTER_LEFT);
+    rightBox.setAlignment(Pos.CENTER_RIGHT);
+
+    BorderPane topPane = new BorderPane();
+    topPane.setLeft(leftBox);
+    topPane.setRight(rightBox);
+    topPane.setPadding(new Insets(10));
+
+    // Tableau des rendez-vous
+    tableView = new TableView<>();
+    setupTableColumns();
+    refreshTable();
+
+    root.setTop(topPane);
+    root.setCenter(tableView);
+
+    Scene scene = new Scene(root, 800, 450);
+    stage.setScene(scene);
+    stage.setTitle("Dashboard Patient");
+    stage.show();
+}
 
     private void setupTableColumns() {
         TableColumn<RendezVous, Integer> idCol = new TableColumn<>("ID");
@@ -83,4 +113,5 @@ public class DashboardPatientView {
     public void refreshAfterCreation() {
         refreshTable();
     }
+    
 }

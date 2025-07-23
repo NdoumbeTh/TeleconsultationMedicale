@@ -70,4 +70,14 @@ public boolean creerConsultation(int medecinId, int patientId,
             return Collections.emptyList();
         }
     }
+    public List<Consultation> listerConsultationsPatient(int patientId) {
+        try (Connection connection = DBConnection.getConnection()) {
+            ConsultationDAO consultationDAO = new ConsultationDAO(connection);
+            return consultationDAO.listerConsultationsPatient(patientId);
+        } catch (SQLException e) {
+            System.err.println("Erreur récupération consultations patient : " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
 }

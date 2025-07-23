@@ -23,4 +23,11 @@ public class PrescriptionController {
             return dao.getPrescriptionsByMedecin(medecinId);
         }
     }
+    public List<Prescription> listerPrescriptionsPatient(int patientId) throws SQLException {
+        try (Connection connection = DBConnection.getConnection()) {
+            PrescriptionDAO dao = new PrescriptionDAO(connection);
+            return dao.getPrescriptionsByPatient(patientId);
+        }
+    }
+
 }
