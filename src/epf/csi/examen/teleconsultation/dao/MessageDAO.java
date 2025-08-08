@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageDAO {
+	
 
     public void envoyerMessage(Message message) {
         try (Connection conn = DBConnection.getConnection()) {
@@ -23,7 +24,9 @@ public class MessageDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
     }
+    
 
     public List<Message> getMessagesEntreUtilisateurs(int user1Id, int user2Id) {
         List<Message> messages = new ArrayList<>();
@@ -140,4 +143,19 @@ public class MessageDAO {
         m.setLu(rs.getBoolean("lu"));
         return m;
     }
+    public static void markMessagesAsRead(int expediteurId, int destinataireId) {
+        String sql = "UPDATE messages SET lu = 1 WHERE expediteur_id = ? AND destinataire_id = ? AND lu = 0";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, expediteurId);
+            ps.setInt(2, destinataireId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

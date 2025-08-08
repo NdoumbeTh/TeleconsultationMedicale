@@ -1,8 +1,11 @@
+// Fichier modifié : RendezVousListView.java (affiche le nom du patient dans la table)
 package epf.csi.examen.teleconsultation.view;
 
 import epf.csi.examen.teleconsultation.controller.RendezVousController;
+import epf.csi.examen.teleconsultation.dao.PatientDAO;
 import epf.csi.examen.teleconsultation.model.RendezVous;
 import epf.csi.examen.teleconsultation.model.Utilisateur;
+import epf.csi.examen.teleconsultation.utils.DBConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -12,7 +15,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -43,7 +45,7 @@ public class RendezVousListView {
         root.setAlignment(Pos.TOP_CENTER);
 
         Label title = new Label("Liste des rendez-vous");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 22));
+        title.setFont(Font.font("Arial", 22));
 
         table = new TableView<>();
         table.setPrefWidth(700);
@@ -62,11 +64,11 @@ public class RendezVousListView {
         colStatut.setCellValueFactory(new PropertyValueFactory<>("statut"));
         colStatut.setPrefWidth(150);
 
-        TableColumn<RendezVous, Integer> colPatient = new TableColumn<>("ID Patient");
-        colPatient.setCellValueFactory(new PropertyValueFactory<>("patientId"));
-        colPatient.setPrefWidth(100);
+        TableColumn<RendezVous, String> colPatientNom = new TableColumn<>("Nom Patient");
+        colPatientNom.setCellValueFactory(new PropertyValueFactory<>("patientNom"));
+        colPatientNom.setPrefWidth(200);
 
-        table.getColumns().addAll(colId, colDate, colStatut, colPatient);
+        table.getColumns().addAll(colId, colDate, colStatut, colPatientNom);
 
         loadRendezVous();
 
@@ -110,136 +112,171 @@ public class RendezVousListView {
 
     private void loadRendezVous() {
         RendezVousController controller = new RendezVousController();
-        List<RendezVous> rdvs = controller.listerRendezVousMedecin(medecinId);
-        data = FXCollections.observableArrayList(rdvs);
-        table.setItems(data);
+        try {
+            List<RendezVous> rdvs = controller.listerRendezVousMedecin(medecinId);
+            data = FXCollections.observableArrayList(rdvs);
+            table.setItems(data);
+        } catch (Exception e) {
+            showAlert("Erreur", "Impossible de charger les rendez-vous.", Alert.AlertType.ERROR);
+        }
     }
 
-    private void ouvrirFormulaireRendezVous(RendezVous rdv) {
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setTitle(rdv == null ? "Créer un rendez-vous" : "Modifier le rendez-vous");
+ // Fichier modifié : RendezVousListView.java (méthode ouvrirFormulaireRendezVous)
 
-        VBox dialogVBox = new VBox(10);
-        dialogVBox.setPadding(new Insets(20));
-        dialogVBox.setAlignment(Pos.CENTER);
+private void ouvrirFormulaireRendezVous(RendezVous rdv) {
+    Stage dialog = new Stage();
+    dialog.initModality(Modality.APPLICATION_MODAL);
+    dialog.setTitle(rdv == null ? "Créer un rendez-vous" : "Modifier le rendez-vous");
 
-        Label lblDate = new Label("Date :");
-        DatePicker dpDate = new DatePicker();
-        dpDate.setPrefWidth(200);
+    VBox dialogVBox = new VBox(10);
+    dialogVBox.setPadding(new Insets(20));
+    dialogVBox.setAlignment(Pos.CENTER);
 
-        Label lblHeure = new Label("Heure (HH:mm) :");
-        TextField tfHeure = new TextField();
-        tfHeure.setPromptText("ex: 14:30");
-        tfHeure.setPrefWidth(200);
+    Label lblDate = new Label("Date :");
+    DatePicker dpDate = new DatePicker();
+    dpDate.setPrefWidth(200);
 
-        Label lblStatut = new Label("Statut :");
-        ComboBox<String> cbStatut = new ComboBox<>();
-        cbStatut.getItems().addAll("Prévu", "Confirmé", "Annulé");
-        cbStatut.setPrefWidth(200);
+    Label lblHeure = new Label("Heure (HH:mm) :");
+    TextField tfHeure = new TextField();
+    tfHeure.setPromptText("ex: 14:30");
+    tfHeure.setPrefWidth(200);
 
-        Label lblPatientId = new Label("ID Patient :");
-        TextField tfPatientId = new TextField();
-        tfPatientId.setPrefWidth(200);
+    Label lblStatut = new Label("Statut :");
+    ComboBox<String> cbStatut = new ComboBox<>();
+    cbStatut.getItems().addAll("Prévu", "Confirmé", "Annulé");
+    cbStatut.setPrefWidth(200);
 
-        // Si modification, pré-remplir les champs
-        if (rdv != null) {
-            LocalDateTime dt = rdv.getDateHeure();
-            if (dt != null) {
-                dpDate.setValue(dt.toLocalDate());
-                tfHeure.setText(String.format("%02d:%02d", dt.getHour(), dt.getMinute()));
-            }
-            cbStatut.setValue(rdv.getStatut());
-            tfPatientId.setText(String.valueOf(rdv.getPatientId()));
-        }
+    Label lblPatient = new Label("Patient :");
+    ComboBox<Utilisateur> cbPatients = new ComboBox<>();
+    cbPatients.setPrefWidth(200);
+    cbPatients.setPromptText("Sélectionnez un patient");
 
-        Button btnValider = new Button(rdv == null ? "Créer" : "Modifier");
-        Button btnAnnuler = new Button("Annuler");
+    // Charger la liste des patients
+    try {
+        PatientDAO patientDAO = new PatientDAO(DBConnection.getConnection());
+        ObservableList<Utilisateur> patientsList = patientDAO.getAllPatients();
+        cbPatients.setItems(patientsList);
 
-        HBox btnBox = new HBox(10, btnValider, btnAnnuler);
-        btnBox.setAlignment(Pos.CENTER);
-
-        Label lblMessage = new Label();
-
-        dialogVBox.getChildren().addAll(
-                lblDate, dpDate,
-                lblHeure, tfHeure,
-                lblStatut, cbStatut,
-                lblPatientId, tfPatientId,
-                lblMessage,
-                btnBox
-        );
-
-        Scene dialogScene = new Scene(dialogVBox, 300, 400);
-        dialog.setScene(dialogScene);
-
-        btnValider.setOnAction(ev -> {
-            LocalDate date = dpDate.getValue();
-            String heureStr = tfHeure.getText();
-            String statut = cbStatut.getValue();
-            String patientIdStr = tfPatientId.getText();
-
-            if (date == null || heureStr == null || heureStr.isEmpty() || statut == null || patientIdStr == null || patientIdStr.isEmpty()) {
-                lblMessage.setText("Tous les champs doivent être remplis.");
-                return;
-            }
-
-            // Parse heure (HH:mm)
-            String[] parts = heureStr.split(":");
-            if (parts.length != 2) {
-                lblMessage.setText("Format heure invalide (HH:mm).");
-                return;
-            }
-
-            int h, m;
-            try {
-                h = Integer.parseInt(parts[0]);
-                m = Integer.parseInt(parts[1]);
-                if (h < 0 || h > 23 || m < 0 || m > 59) {
-                    lblMessage.setText("Heure invalide.");
-                    return;
-                }
-            } catch (NumberFormatException ex) {
-                lblMessage.setText("Heure invalide.");
-                return;
-            }
-
-            int patientId;
-            try {
-                patientId = Integer.parseInt(patientIdStr);
-            } catch (NumberFormatException ex) {
-                lblMessage.setText("ID Patient invalide.");
-                return;
-            }
-
-            LocalDateTime dateHeure = LocalDateTime.of(date, LocalTime.of(h, m));
-
-            RendezVousController controller = new RendezVousController();
-            boolean success;
-
-            if (rdv == null) {
-                // Création
-                success = controller.creerRendezVous(medecinId, patientId, dateHeure, statut);
-            } else {
-                // Modification
-                rdv.setDateHeure(dateHeure);
-                rdv.setPatientId(patientId);
-                rdv.setStatut(statut);
-                success = controller.modifierRendezVous(rdv);
-            }
-
-            if (success) {
-                loadRendezVous();
-                dialog.close();
-            } else {
-                lblMessage.setText("Erreur lors de l'enregistrement.");
+        cbPatients.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(Utilisateur user, boolean empty) {
+                super.updateItem(user, empty);
+                setText(empty || user == null ? null : user.getNom());
             }
         });
 
-        btnAnnuler.setOnAction(ev -> dialog.close());
+        cbPatients.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Utilisateur user, boolean empty) {
+                super.updateItem(user, empty);
+                setText(empty || user == null ? null : user.getNom());
+            }
+        });
 
-        dialog.showAndWait();
+        // Pré-remplir en cas de modification
+        if (rdv != null) {
+            for (Utilisateur u : patientsList) {
+                if (u.getId() == rdv.getPatientId()) {
+                    cbPatients.setValue(u);
+                    break;
+                }
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+
+    // Si modification, pré-remplir les champs
+    if (rdv != null) {
+        LocalDateTime dt = rdv.getDateHeure();
+        if (dt != null) {
+            dpDate.setValue(dt.toLocalDate());
+            tfHeure.setText(String.format("%02d:%02d", dt.getHour(), dt.getMinute()));
+        }
+        cbStatut.setValue(rdv.getStatut());
+    }
+
+    Button btnValider = new Button(rdv == null ? "Créer" : "Modifier");
+    Button btnAnnuler = new Button("Annuler");
+
+    HBox btnBox = new HBox(10, btnValider, btnAnnuler);
+    btnBox.setAlignment(Pos.CENTER);
+
+    Label lblMessage = new Label();
+
+    dialogVBox.getChildren().addAll(
+        lblDate, dpDate,
+        lblHeure, tfHeure,
+        lblStatut, cbStatut,
+        lblPatient, cbPatients,
+        lblMessage,
+        btnBox
+    );
+
+    Scene dialogScene = new Scene(dialogVBox, 300, 450);
+    dialog.setScene(dialogScene);
+
+    btnValider.setOnAction(ev -> {
+        LocalDate date = dpDate.getValue();
+        String heureStr = tfHeure.getText();
+        String statut = cbStatut.getValue();
+        Utilisateur selectedPatient = cbPatients.getValue();
+
+        if (date == null || heureStr == null || heureStr.isEmpty() || statut == null || selectedPatient == null) {
+            lblMessage.setText("Tous les champs doivent être remplis.");
+            return;
+        }
+
+        // Parse heure (HH:mm)
+        String[] parts = heureStr.split(":");
+        if (parts.length != 2) {
+            lblMessage.setText("Format heure invalide (HH:mm).");
+            return;
+        }
+
+        int h, m;
+        try {
+            h = Integer.parseInt(parts[0]);
+            m = Integer.parseInt(parts[1]);
+            if (h < 0 || h > 23 || m < 0 || m > 59) {
+                lblMessage.setText("Heure invalide.");
+                return;
+            }
+        } catch (NumberFormatException ex) {
+            lblMessage.setText("Heure invalide.");
+            return;
+        }
+
+        int patientId = selectedPatient.getId();
+        LocalDateTime dateHeure = LocalDateTime.of(date, LocalTime.of(h, m));
+
+        RendezVousController controller = new RendezVousController();
+        boolean success;
+
+        if (rdv == null) {
+            // Création
+            success = controller.creerRendezVous(medecinId, patientId, dateHeure, statut);
+        } else {
+            // Modification
+            rdv.setDateHeure(dateHeure);
+            rdv.setPatientId(patientId);
+            rdv.setStatut(statut);
+            success = controller.modifierRendezVous(rdv);
+        }
+
+        if (success) {
+            loadRendezVous();
+            dialog.close();
+        } else {
+            lblMessage.setText("Erreur lors de l'enregistrement.");
+        }
+    });
+
+    btnAnnuler.setOnAction(ev -> dialog.close());
+
+    dialog.showAndWait();
+}
 
     private void supprimerRendezVous(RendezVous rdv) {
         RendezVousController controller = new RendezVousController();

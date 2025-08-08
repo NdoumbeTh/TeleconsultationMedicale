@@ -1,6 +1,7 @@
 package epf.csi.examen.teleconsultation.dao;
 
 import epf.csi.examen.teleconsultation.model.RendezVous;
+import epf.csi.examen.teleconsultation.utils.DBConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -111,4 +112,41 @@ public class RendezVousDAO {
         return list;
     }
 
+    public int countRendezVousByMedecin(int medecinId) {
+        String sql = "SELECT COUNT(*) FROM rendez_vous WHERE medecin_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, medecinId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+        public List<RendezVous> findByPatientId(int patientId) {
+            List<RendezVous> rdvs = new ArrayList<>();
+            String sql = "SELECT * FROM rendezvous WHERE patient_id = ? ORDER BY date_heure DESC";
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, patientId);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    RendezVous rdv = new RendezVous(
+                        rs.getInt("id"),
+                        rs.getInt("medecin_id"),
+                        rs.getInt("patient_id"),
+                        rs.getTimestamp("date_heure").toLocalDateTime(),
+                        rs.getString("statut")
+                    );
+                    rdvs.add(rdv);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return rdvs;
+        }
 }

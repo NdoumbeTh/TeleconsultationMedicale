@@ -30,14 +30,10 @@ public class PrescriptionPatientView {
 
         table.getColumns().addAll(dateCol, medicamentCol, remarquesCol);
 
-        try {
-            PrescriptionController controller = new PrescriptionController();
-            List<Prescription> prescriptions = controller.listerPrescriptionsPatient(patientId);
-            ObservableList<Prescription> data = FXCollections.observableArrayList(prescriptions);
-            table.setItems(data);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        PrescriptionController controller = new PrescriptionController();
+		List<Prescription> prescriptions = controller.listerPrescriptionsPatient(patientId);
+		ObservableList<Prescription> data = FXCollections.observableArrayList(prescriptions);
+		table.setItems(data);
 
         VBox root = new VBox(table);
         Scene scene = new Scene(root, 600, 400);

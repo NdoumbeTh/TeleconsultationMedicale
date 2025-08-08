@@ -1,7 +1,6 @@
 package epf.csi.examen.teleconsultation.controller;
 
 import epf.csi.examen.teleconsultation.dao.MessageDAO;
-import epf.csi.examen.teleconsultation.dao.UtilisateurDAO;
 import epf.csi.examen.teleconsultation.model.Message;
 import epf.csi.examen.teleconsultation.model.Utilisateur;
 

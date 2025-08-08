@@ -6,6 +6,7 @@ public class Message {
     private int id;
     private int expediteurId;
     private int destinataireId;
+    private String objet;
     private String contenu;
     private LocalDateTime dateEnvoi;
     private boolean lu;
@@ -19,6 +20,9 @@ public class Message {
 
     public int getDestinataireId() { return destinataireId; }
     public void setDestinataireId(int destinataireId) { this.destinataireId = destinataireId; }
+
+    public String getObjet() { return objet; }
+    public void setObjet(String objet) { this.objet = objet; }
 
     public String getContenu() { return contenu; }
     public void setContenu(String contenu) { this.contenu = contenu; }

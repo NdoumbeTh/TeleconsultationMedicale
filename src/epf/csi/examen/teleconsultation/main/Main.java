@@ -28,6 +28,8 @@ public class Main extends Application {
             System.out.println("Lancement de l'interface utilisateur...");
             LoginView loginView = new LoginView(primaryStage);
             Scene scene = new Scene(loginView.getView(), 400, 300);
+            scene.getStylesheets().add(getClass().getResource("/epf/csi/examen/teleconsultation/ressources/carelinker.css").toExternalForm());
+
 
             primaryStage.setTitle("CareLinker - Connexion");
             primaryStage.setScene(scene);

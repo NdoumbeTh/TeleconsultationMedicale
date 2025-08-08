@@ -14,6 +14,20 @@ public class Consultation {
     private final StringProperty motif;
     private final StringProperty nomPatient;  // Pour afficher dans la table, info jointe
     private final StringProperty nomMedecin;  // Optionnel
+    private StringProperty lienTeleconsultation = new SimpleStringProperty();
+
+    public String getLienTeleconsultation() {
+        return lienTeleconsultation.get();
+    }
+
+    public void setLienTeleconsultation(String lien) {
+        this.lienTeleconsultation.set(lien);
+    }
+
+    public StringProperty lienTeleconsultationProperty() {
+        return lienTeleconsultation;
+    }
+
 
     // Constructeur complet
     public Consultation(int id, int idPatient, int idMedecin, LocalDateTime dateHeure,
@@ -28,6 +42,18 @@ public class Consultation {
         this.motif = new SimpleStringProperty(motif);
         this.nomPatient = new SimpleStringProperty(nomPatient);
         this.nomMedecin = new SimpleStringProperty(nomMedecin);
+    }
+    public Consultation() {
+        this.id = new SimpleIntegerProperty();
+        this.idPatient = new SimpleIntegerProperty();
+        this.idMedecin = new SimpleIntegerProperty();
+        this.dateHeure = new SimpleObjectProperty<>();
+        this.type = new SimpleStringProperty();
+        this.statut = new SimpleStringProperty();
+        this.motif = new SimpleStringProperty();
+        this.nomPatient = new SimpleStringProperty();
+        this.nomMedecin = new SimpleStringProperty();
+        this.lienTeleconsultation = new SimpleStringProperty();
     }
 
     // Constructeur simplifié (sans noms)

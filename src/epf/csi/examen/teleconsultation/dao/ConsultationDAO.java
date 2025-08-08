@@ -5,7 +5,6 @@ import epf.csi.examen.teleconsultation.utils.DBConnection;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,29 +16,33 @@ public class ConsultationDAO {
         this.connection = connection;
     }
 
+
     // Créer une nouvelle consultation
-    public void save(Consultation consultation) throws SQLException {
-        String sql = "INSERT INTO consultations (id_patient, id_medecin, date_heure, type, statut, motif) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setInt(1, consultation.getIdPatient());
-            stmt.setInt(2, consultation.getIdMedecin());
-            stmt.setTimestamp(3, Timestamp.valueOf(consultation.getDateHeure()));
-            stmt.setString(4, consultation.getType());
-            stmt.setString(5, consultation.getStatut());
-            stmt.setString(6, consultation.getMotif());
-            int affectedRows = stmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Échec de la création de la consultation, aucune ligne affectée.");
-            }
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    consultation.setId(generatedKeys.getInt(1));
-                }
+public void save(Consultation consultation) throws SQLException {
+    String sql = "INSERT INTO consultations (id_medecin, id_patient, date_heure, motif, type, statut, lien_teleconsultation) VALUES ( ?, ?, ?, ?, ?, ?, ?)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        stmt.setInt(1, consultation.getIdMedecin());
+        stmt.setInt(2, consultation.getIdPatient());
+        stmt.setTimestamp(3, Timestamp.valueOf(consultation.getDateHeure()));
+        stmt.setString(4, consultation.getMotif());
+        stmt.setString(5, consultation.getType());
+        stmt.setString(6, consultation.getStatut());
+        stmt.setString(7, consultation.getLienTeleconsultation());
+
+        int affectedRows = stmt.executeUpdate(); // ✅ UNE SEULE FOIS
+        if (affectedRows == 0) {
+            throw new SQLException("Échec de la création de la consultation, aucune ligne affectée.");
+        }
+
+        try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                consultation.setId(generatedKeys.getInt(1));
             }
         }
     }
+}
 
-    // Lire une consultation par son ID
+    // Trouver consultation par ID
     public Consultation findById(int id) throws SQLException {
         String sql = "SELECT c.*, p.nom AS nom_patient, m.nom AS nom_medecin " +
                      "FROM consultations c " +
@@ -68,7 +71,8 @@ public class ConsultationDAO {
             stmt.setString(4, consultation.getType());
             stmt.setString(5, consultation.getStatut());
             stmt.setString(6, consultation.getMotif());
-            stmt.setInt(7, consultation.getId());
+            stmt.setString(7, consultation.getLienTeleconsultation());
+            stmt.setInt(8, consultation.getId());
             stmt.executeUpdate();
         }
     }
@@ -82,8 +86,8 @@ public class ConsultationDAO {
         }
     }
 
-    // Lister toutes les consultations d’un médecin, avec nom patient pour affichage
-    public List<Consultation> listerConsultationsMedecin(int idMedecin) throws SQLException {
+    // Lister consultations d’un médecin (ordre décroissant)
+    public List<Consultation> listerConsultationsMedecin(int medecinId) throws SQLException {
         List<Consultation> consultations = new ArrayList<>();
         String sql = "SELECT c.*, p.nom AS nom_patient, m.nom AS nom_medecin " +
                      "FROM consultations c " +
@@ -92,7 +96,7 @@ public class ConsultationDAO {
                      "WHERE c.id_medecin = ? " +
                      "ORDER BY c.date_heure DESC";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, idMedecin);
+            stmt.setInt(1, medecinId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     consultations.add(mapResultSetToConsultation(rs));
@@ -102,22 +106,8 @@ public class ConsultationDAO {
         return consultations;
     }
 
-    // Méthode utilitaire pour mapper un ResultSet en Consultation
-    private Consultation mapResultSetToConsultation(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
-        int idPatient = rs.getInt("id_patient");
-        int idMedecin = rs.getInt("id_medecin");
-        Timestamp ts = rs.getTimestamp("date_heure");
-        LocalDateTime dateHeure = ts.toLocalDateTime();
-        String type = rs.getString("type");
-        String statut = rs.getString("statut");
-        String motif = rs.getString("motif");
-        String nomPatient = rs.getString("nom_patient");
-        String nomMedecin = rs.getString("nom_medecin");
-
-        return new Consultation(id, idPatient, idMedecin, dateHeure, type, statut, motif, nomPatient, nomMedecin);
-    }
-    public List<Consultation> listerConsultationsPatient(int idPatient) throws SQLException {
+    // Lister consultations d’un patient (ordre décroissant)
+    public List<Consultation> listerConsultationsPatient(int patientId) throws SQLException {
         List<Consultation> consultations = new ArrayList<>();
         String sql = "SELECT c.*, p.nom AS nom_patient, m.nom AS nom_medecin " +
                      "FROM consultations c " +
@@ -126,7 +116,7 @@ public class ConsultationDAO {
                      "WHERE c.id_patient = ? " +
                      "ORDER BY c.date_heure DESC";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, idPatient);
+            stmt.setInt(1, patientId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     consultations.add(mapResultSetToConsultation(rs));
@@ -136,4 +126,53 @@ public class ConsultationDAO {
         return consultations;
     }
 
+    // Compter consultations par médecin
+    public int countConsultationsByMedecin(int medecinId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM consultations WHERE id_medecin = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, medecinId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    // Compter consultations par patient
+    public int countConsultationsByPatient(int patientId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM consultations WHERE id_patient = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, patientId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    // Mapper ResultSet -> Consultation
+    private Consultation mapResultSetToConsultation(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        int idPatient = rs.getInt("id_patient");
+        int idMedecin = rs.getInt("id_medecin");
+        LocalDateTime dateHeure = rs.getTimestamp("date_heure").toLocalDateTime();
+        String type = rs.getString("type");
+        String statut = rs.getString("statut");
+        String motif = rs.getString("motif");
+        String nomPatient = rs.getString("nom_patient");
+        String nomMedecin = rs.getString("nom_medecin");
+        String lien = rs.getString("lien_teleconsultation");
+
+
+        Consultation consultation = new Consultation(id, idPatient, idMedecin, dateHeure, type, statut, motif, nomPatient, nomMedecin);
+        consultation.setLienTeleconsultation(lien);
+        return consultation;
+
+
+
+    }
 }

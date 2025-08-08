@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrescriptionDAO {
+
     private final Connection connection;
 
     public PrescriptionDAO(Connection connection) {
@@ -30,38 +31,63 @@ public class PrescriptionDAO {
         String sql = "SELECT * FROM prescriptions WHERE medecin_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, medecinId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Prescription p = new Prescription();
-                p.setId(rs.getInt("id"));
-                p.setDate(rs.getDate("date").toLocalDate());
-                p.setMedicaments(rs.getString("medicaments"));
-                p.setRemarques(rs.getString("remarques"));
-                p.setPatientId(rs.getInt("patient_id"));
-                p.setMedecinId(rs.getInt("medecin_id"));
-                prescriptions.add(p);
-            }
-        }
-        return prescriptions;
-    }
-    public List<Prescription> getPrescriptionsByPatient(int patientId) throws SQLException {
-        List<Prescription> prescriptions = new ArrayList<>();
-        String sql = "SELECT * FROM prescriptions WHERE patient_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, patientId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Prescription p = new Prescription();
-                p.setId(rs.getInt("id"));
-                p.setDate(rs.getDate("date").toLocalDate());
-                p.setMedicaments(rs.getString("medicaments"));
-                p.setRemarques(rs.getString("remarques"));
-                p.setPatientId(rs.getInt("patient_id"));
-                p.setMedecinId(rs.getInt("medecin_id"));
-                prescriptions.add(p);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    prescriptions.add(mapResultSetToPrescription(rs));
+                }
             }
         }
         return prescriptions;
     }
 
+    public List<Prescription> getPrescriptionsByPatient(int patientId) throws SQLException {
+        List<Prescription> prescriptions = new ArrayList<>();
+        String sql = "SELECT * FROM prescriptions WHERE patient_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, patientId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    prescriptions.add(mapResultSetToPrescription(rs));
+                }
+            }
+        }
+        return prescriptions;
+    }
+
+    public int countPrescriptionsByMedecin(int medecinId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM prescriptions WHERE medecin_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, medecinId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    public int countPrescriptionsByPatient(int patientId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM prescriptions WHERE patient_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, patientId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
+    private Prescription mapResultSetToPrescription(ResultSet rs) throws SQLException {
+        Prescription p = new Prescription();
+        p.setId(rs.getInt("id"));
+        p.setDate(rs.getDate("date").toLocalDate());
+        p.setMedicaments(rs.getString("medicaments"));
+        p.setRemarques(rs.getString("remarques"));
+        p.setPatientId(rs.getInt("patient_id"));
+        p.setMedecinId(rs.getInt("medecin_id"));
+        return p;
+    }
 }

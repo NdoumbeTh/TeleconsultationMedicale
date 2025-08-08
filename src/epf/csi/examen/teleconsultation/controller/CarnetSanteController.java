@@ -9,7 +9,7 @@ public class CarnetSanteController {
 
     public CarnetSante getCarnetSanteParPatient(int patientId) {
         // Simulé — retourne un carnet fictif
-        return new CarnetSante(patientId, "Groupe sanguin : A+\nAllergies : aucune\nAntécédents : asthme");
+        return new CarnetSante();
     }
 
     public void mettreAJourCarnet(CarnetSante carnet) {

@@ -34,7 +34,7 @@ public class ConsultationListView {
         root.setAlignment(Pos.TOP_CENTER);
 
         Label title = new Label("Liste des consultations");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 22));
+        title.setFont(Font.font("Arial", 22));
 
         table = new TableView<>();
         // Ici tu peux configurer les colonnes de la table (ex : date, patient, motif, etc.)

@@ -16,27 +16,27 @@ public class PatientDAO {
         this.connection = connection;
     }
 
-    public ObservableList<Utilisateur> getAllPatients() {
-        ObservableList<Utilisateur> patients = FXCollections.observableArrayList();
-        String query = "SELECT * FROM utilisateurs WHERE role = 'patient'";
+public ObservableList<Utilisateur> getAllPatients() {
+    ObservableList<Utilisateur> patients = FXCollections.observableArrayList();
+    String query = "SELECT * FROM utilisateurs WHERE role = 'patient'";
 
-        try (PreparedStatement stmt = connection.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
+    try (PreparedStatement stmt = connection.prepareStatement(query);
+         ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                Utilisateur patient = new Utilisateur(
-                    rs.getInt("id"),
-                    rs.getString("prenom"),
-                    rs.getString("email"),
-                    rs.getString("nom"),
-                    rs.getString("role")
-                );
-                patients.add(patient);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (rs.next()) {
+            Utilisateur patient = new Utilisateur(
+                rs.getInt("id"),
+                rs.getString("nom"),    // utilisé comme nom complet
+                rs.getString("email"),
+                null,                   // pas de champ `nom` séparé si `prenom` est utilisé pour cela
+                rs.getString("role")
+            );
+            patients.add(patient);
         }
-
-        return patients;
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+
+    return patients;
+}
 }

@@ -45,4 +45,11 @@ public class MessageMedecinController {
     public List<Utilisateur> getPatientsAyantCommunique(int medecinId) {
         return messageDAO.getPatientsAyantCommuniqueAvec(medecinId);
     }
+   
+
+    public void marquerMessagesCommeLus(int expediteurId, int destinataireId) {
+        MessageDAO.markMessagesAsRead(expediteurId, destinataireId);
+    }
+
+    
 }

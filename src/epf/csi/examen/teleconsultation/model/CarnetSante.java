@@ -1,18 +1,32 @@
 package epf.csi.examen.teleconsultation.model;
 
+import javafx.beans.property.*;
+
 public class CarnetSante {
-    private int patientId;
-    private String contenu;
+    private final IntegerProperty id = new SimpleIntegerProperty();
+    private final StringProperty groupeSanguin = new SimpleStringProperty();
+    private final StringProperty allergies = new SimpleStringProperty();
+    private final StringProperty antecedents = new SimpleStringProperty();
+    private final IntegerProperty patientId = new SimpleIntegerProperty();
 
-    public CarnetSante(int patientId, String contenu) {
-        this.patientId = patientId;
-        this.contenu = contenu;
-    }
+    // Getters/Setters
+    public int getId() { return id.get(); }
+    public void setId(int value) { id.set(value); }
+    public IntegerProperty idProperty() { return id; }
 
-    // Getters et Setters
-    public int getPatientId() { return patientId; }
-    public String getContenu() { return contenu; }
+    public String getGroupeSanguin() { return groupeSanguin.get(); }
+    public void setGroupeSanguin(String value) { groupeSanguin.set(value); }
+    public StringProperty groupeSanguinProperty() { return groupeSanguin; }
 
-    public void setPatientId(int patientId) { this.patientId = patientId; }
-    public void setContenu(String contenu) { this.contenu = contenu; }
+    public String getAllergies() { return allergies.get(); }
+    public void setAllergies(String value) { allergies.set(value); }
+    public StringProperty allergiesProperty() { return allergies; }
+
+    public String getAntecedents() { return antecedents.get(); }
+    public void setAntecedents(String value) { antecedents.set(value); }
+    public StringProperty antecedentsProperty() { return antecedents; }
+
+    public int getPatientId() { return patientId.get(); }
+    public void setPatientId(int value) { patientId.set(value); }
+    public IntegerProperty patientIdProperty() { return patientId; }
 }

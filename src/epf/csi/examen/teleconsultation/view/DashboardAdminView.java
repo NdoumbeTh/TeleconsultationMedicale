@@ -1,55 +1,69 @@
 package epf.csi.examen.teleconsultation.view;
 
-import epf.csi.examen.teleconsultation.controller.UserController;
+import epf.csi.examen.teleconsultation.controller.UtilisateurController;
 import epf.csi.examen.teleconsultation.model.Utilisateur;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DashboardAdminView {
 
-    private final UserController userController = new UserController();
+    private final UtilisateurController userController = new UtilisateurController();
     private final ObservableList<Utilisateur> userList = FXCollections.observableArrayList();
     private final ObservableList<Utilisateur> filteredUserList = FXCollections.observableArrayList();
     private TableView<Utilisateur> tableView;
     private ComboBox<String> filterRoleBox;
+    private TextField searchField;
     private Label statsLabel;
+    private BarChart<String, Number> barChart;
 
     public DashboardAdminView(Stage stage) {
-        // Titre principal
         Label title = new Label("Interface Administrateur - Gestion de Tous les Utilisateurs");
-        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        title.getStyleClass().add("dashboard-title");
 
-        // Section de statistiques
         statsLabel = new Label();
-        statsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-padding: 10px;");
+        statsLabel.getStyleClass().add("stats-label");
 
-        // Section de filtrage
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Rôle");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Nombre d'utilisateurs");
+
+        barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setTitle("Utilisateurs par rôle");
+        barChart.setLegendVisible(false);
+        barChart.setPrefHeight(300);
+
         HBox filterSection = createFilterSection();
-
-        // TableView améliorée
         tableView = createTableView();
-
-        // Section de formulaire d'ajout
         VBox formSection = createFormSection();
 
-        // Layout principal
-        VBox root = new VBox(15);
-        root.getChildren().addAll(title, statsLabel, filterSection, tableView, formSection);
+        VBox root = new VBox(15, title, statsLabel, barChart, filterSection, tableView, formSection);
         root.setPadding(new Insets(20));
         root.setAlignment(Pos.TOP_CENTER);
-        root.setStyle("-fx-background-color: #ecf0f1;");
+        root.getStyleClass().add("dashboard-root");
 
-        Scene scene = new Scene(root, 1100, 700);
+        Scene scene = new Scene(root, 1100, 900);
+        java.net.URL cssURL = getClass().getResource("/epf/csi/examen/teleconsultation/ressources/carelinker.css");
+        if (cssURL != null) {
+            scene.getStylesheets().add(cssURL.toExternalForm());
+        } else {
+            System.err.println("⚠️ Le fichier CSS est introuvable à l'emplacement /epf/csi/examen/teleconsultation/ressources/carelinker.css");
+        }
+
         stage.setTitle("CareLinker - Dashboard Administrateur Complet");
         stage.setScene(scene);
         stage.show();
@@ -59,25 +73,31 @@ public class DashboardAdminView {
 
     private HBox createFilterSection() {
         Label filterLabel = new Label("Filtrer par rôle:");
-        filterLabel.setStyle("-fx-font-weight: bold;");
+        filterLabel.getStyleClass().add("filter-label");
 
         filterRoleBox = new ComboBox<>();
         filterRoleBox.getItems().addAll("Tous", "admin", "medecin", "patient");
         filterRoleBox.setValue("Tous");
         filterRoleBox.setOnAction(e -> filtrerUtilisateurs());
+        filterRoleBox.getStyleClass().add("role-combobox");
+
+        searchField = new TextField();
+        searchField.setPromptText("Rechercher par nom ou email");
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> filtrerUtilisateurs());
+        searchField.getStyleClass().add("search-field");
 
         Button refreshButton = new Button("🔄 Actualiser");
         refreshButton.setOnAction(e -> chargerTousLesUtilisateurs());
-        refreshButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white;");
+        refreshButton.getStyleClass().add("refresh-button");
 
         Button exportButton = new Button("📊 Exporter");
         exportButton.setOnAction(e -> exporterUtilisateurs());
-        exportButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white;");
+        exportButton.getStyleClass().add("export-button");
 
-        HBox filterBox = new HBox(15, filterLabel, filterRoleBox, refreshButton, exportButton);
+        HBox filterBox = new HBox(15, filterLabel, filterRoleBox, searchField, refreshButton, exportButton);
         filterBox.setAlignment(Pos.CENTER_LEFT);
         filterBox.setPadding(new Insets(10));
-        filterBox.setStyle("-fx-background-color: white; -fx-background-radius: 5px;");
+        filterBox.getStyleClass().add("filter-box");
 
         return filterBox;
     }
@@ -85,55 +105,24 @@ public class DashboardAdminView {
     private TableView<Utilisateur> createTableView() {
         TableView<Utilisateur> table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setStyle("-fx-background-color: white;");
+        table.getStyleClass().add("user-table");
 
-        // Colonne ID
         TableColumn<Utilisateur, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         idCol.setPrefWidth(60);
 
-        // Colonne Nom
         TableColumn<Utilisateur, String> nomCol = new TableColumn<>("Nom");
         nomCol.setCellValueFactory(new PropertyValueFactory<>("nom"));
         nomCol.setPrefWidth(180);
 
-        // Colonne Email
         TableColumn<Utilisateur, String> emailCol = new TableColumn<>("Email");
         emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
         emailCol.setPrefWidth(250);
 
-        // Colonne Rôle avec style coloré
         TableColumn<Utilisateur, String> roleCol = new TableColumn<>("Rôle");
         roleCol.setCellValueFactory(new PropertyValueFactory<>("role"));
         roleCol.setPrefWidth(120);
-        roleCol.setCellFactory(column -> new TableCell<Utilisateur, String>() {
-            @Override
-            protected void updateItem(String role, boolean empty) {
-                super.updateItem(role, empty);
-                if (empty || role == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(role.toUpperCase());
-                    switch (role.toLowerCase()) {
-                        case "admin":
-                            setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
-                            break;
-                        case "medecin":
-                            setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
-                            break;
-                        case "patient":
-                            setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
-                            break;
-                        default:
-                            setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-weight: bold;");
-                            break;
-                    }
-                }
-            }
-        });
 
-        // Colonne Actions
         TableColumn<Utilisateur, Void> actionCol = new TableColumn<>("Actions");
         actionCol.setPrefWidth(150);
         actionCol.setCellFactory(column -> new TableCell<Utilisateur, Void>() {
@@ -141,8 +130,8 @@ public class DashboardAdminView {
             private final Button editBtn = new Button("✏️");
 
             {
-                deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
-                editBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white;");
+                deleteBtn.getStyleClass().add("delete-button");
+                editBtn.getStyleClass().add("edit-button");
 
                 deleteBtn.setOnAction(e -> {
                     Utilisateur user = getTableView().getItems().get(getIndex());
@@ -177,31 +166,32 @@ public class DashboardAdminView {
 
     private VBox createFormSection() {
         Label formTitle = new Label("Ajouter un Nouvel Utilisateur");
-        formTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        formTitle.getStyleClass().add("form-title");
 
-        // Champs de formulaire
         TextField nomField = new TextField();
         nomField.setPromptText("Nom complet");
-        nomField.setPrefWidth(200);
+        nomField.getStyleClass().add("form-field");
 
         TextField emailField = new TextField();
         emailField.setPromptText("Adresse email");
-        emailField.setPrefWidth(250);
+        emailField.getStyleClass().add("form-field");
 
         PasswordField mdpField = new PasswordField();
         mdpField.setPromptText("Mot de passe");
-        mdpField.setPrefWidth(200);
+        mdpField.getStyleClass().add("form-field");
 
         ComboBox<String> roleBox = new ComboBox<>();
         roleBox.getItems().addAll("admin", "medecin", "patient");
         roleBox.setPromptText("Sélectionner un rôle");
-        roleBox.setPrefWidth(150);
+        roleBox.getStyleClass().add("form-field");
 
         Button addButton = new Button("➕ Créer Utilisateur");
         addButton.setDefaultButton(true);
-        addButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+        addButton.getStyleClass().add("add-button");
 
         Label messageLabel = new Label();
+        // Optionnel: ajouter une classe css
+        messageLabel.getStyleClass().add("message-label");
 
         addButton.setOnAction(e -> {
             String nom = nomField.getText().trim();
@@ -214,13 +204,12 @@ public class DashboardAdminView {
                 return;
             }
 
-            // Validation email basique
             if (!email.contains("@") || !email.contains(".")) {
                 showMessage(messageLabel, "⚠️ Format d'email invalide.", "red");
                 return;
             }
 
-            boolean success = userController.creerUtilisateur(nom, email, mdp, role);
+            boolean success = UtilisateurController.creerUtilisateur(nom, email, mdp, role);
             if (success) {
                 showMessage(messageLabel, "✅ Utilisateur créé avec succès !", "green");
                 nomField.clear();
@@ -239,14 +228,14 @@ public class DashboardAdminView {
         VBox formSection = new VBox(10, formTitle, form, messageLabel);
         formSection.setAlignment(Pos.CENTER);
         formSection.setPadding(new Insets(15));
-        formSection.setStyle("-fx-background-color: white; -fx-background-radius: 5px;");
+        formSection.getStyleClass().add("form-section");
 
         return formSection;
     }
 
     private void chargerTousLesUtilisateurs() {
         try {
-            List<Utilisateur> liste = userController.obtenirTousLesUtilisateurs();
+            List<Utilisateur> liste = UtilisateurController.obtenirTousLesUtilisateurs();
             userList.setAll(liste);
             filtrerUtilisateurs();
             mettreAJourStatistiques();
@@ -278,17 +267,25 @@ public class DashboardAdminView {
                 totalUsers, admins, medecins, patients
         );
         statsLabel.setText(stats);
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.getData().add(new XYChart.Data<>("Admins", admins));
+        series.getData().add(new XYChart.Data<>("Médecins", medecins));
+        series.getData().add(new XYChart.Data<>("Patients", patients));
+
+        barChart.getData().clear();
+        barChart.getData().add(series);
     }
 
     private void supprimerUtilisateur(Utilisateur user) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation de suppression");
         alert.setHeaderText("Supprimer l'utilisateur: " + user.getNom());
-        alert.setContentText("Êtes-vous sûr de vouloir supprimer cet utilisateur?\nCette action est irréversible.");
+        alert.setContentText("Êtes-vous sûr de vouloir supprimer cet utilisateur? Cette action est irréversible.");
 
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                boolean success = userController.supprimerUtilisateur(user.getId());
+                boolean success = UtilisateurController.supprimerUtilisateur(user.getId());
                 if (success) {
                     chargerTousLesUtilisateurs();
                     showAlert("Succès", "Utilisateur supprimé avec succès.");
@@ -300,7 +297,6 @@ public class DashboardAdminView {
     }
 
     private void modifierUtilisateur(Utilisateur user) {
-        // Créer une boîte de dialogue pour la modification
         Dialog<Utilisateur> dialog = new Dialog<>();
         dialog.setTitle("Modifier l'utilisateur");
         dialog.setHeaderText("Modification de: " + user.getNom());
@@ -339,7 +335,7 @@ public class DashboardAdminView {
         });
 
         dialog.showAndWait().ifPresent(result -> {
-            boolean success = userController.mettreAJourUtilisateur(result);
+            boolean success = UtilisateurController.mettreAJourUtilisateur(result);
             if (success) {
                 chargerTousLesUtilisateurs();
                 showAlert("Succès", "Utilisateur modifié avec succès.");
@@ -350,11 +346,10 @@ public class DashboardAdminView {
     }
 
     private void exporterUtilisateurs() {
-        // Fonction d'export simple (console pour l'exemple)
         System.out.println("=== EXPORT DES UTILISATEURS ===");
-        userList.forEach(user -> 
-            System.out.printf("%d;%s;%s;%s%n", 
-                user.getId(), user.getNom(), user.getEmail(), user.getRole())
+        userList.forEach(user ->
+                System.out.printf("%d;%s;%s;%s%n",
+                        user.getId(), user.getNom(), user.getEmail(), user.getRole())
         );
         showAlert("Export", "Liste des utilisateurs exportée dans la console.");
     }

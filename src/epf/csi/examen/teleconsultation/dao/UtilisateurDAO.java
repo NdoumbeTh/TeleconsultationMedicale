@@ -419,5 +419,22 @@ public class UtilisateurDAO {
         }
         return interlocuteurs;
     }
+    public List<Utilisateur> listerPatients() throws SQLException {
+        List<Utilisateur> patients = new ArrayList<>();
+        String sql = "SELECT * FROM utilisateurs WHERE role = 'patient'";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Utilisateur u = new Utilisateur();
+                u.setId(rs.getInt("id"));
+                u.setNom(rs.getString("nom"));
+                u.setEmail(rs.getString("email"));
+                u.setRole(rs.getString("role"));
+                patients.add(u);
+            }
+        }
+        return patients;
+    }
+
 
 }

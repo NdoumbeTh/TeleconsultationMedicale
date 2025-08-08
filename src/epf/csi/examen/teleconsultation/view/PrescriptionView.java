@@ -1,8 +1,10 @@
 package epf.csi.examen.teleconsultation.view;
 
 import epf.csi.examen.teleconsultation.controller.PrescriptionController;
+import epf.csi.examen.teleconsultation.dao.UtilisateurDAO;
 import epf.csi.examen.teleconsultation.model.Prescription;
 import epf.csi.examen.teleconsultation.model.Utilisateur;
+import epf.csi.examen.teleconsultation.utils.DBConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -12,16 +14,20 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PrescriptionView {
 
     private TableView<Prescription> table;
     private ObservableList<Prescription> prescriptionData;
+    private Map<String, Integer> nomPatientToIdMap = new HashMap<>();
 
-    public void start(Stage stage, Utilisateur medecin) {
+    public void start(Stage stage, Utilisateur medecin) throws SQLException {
         Label title = new Label("Gestion des Ordonnances");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
@@ -31,18 +37,27 @@ public class PrescriptionView {
         medicamentsField.setPromptText("Médicaments");
         TextArea remarquesArea = new TextArea();
         remarquesArea.setPromptText("Remarques");
-        TextField patientIdField = new TextField();
-        patientIdField.setPromptText("ID du patient");
+
+        ComboBox<String> comboPatients = new ComboBox<>();
+        chargerPatients(comboPatients);
 
         Button ajouterBtn = new Button("Ajouter l'ordonnance");
+        Button retourBtn = new Button("Retour Dashboard");
 
         ajouterBtn.setOnAction(e -> {
             try {
+                String nomPatient = comboPatients.getValue();
+                if (nomPatient == null || !nomPatientToIdMap.containsKey(nomPatient)) {
+                    showAlert("Erreur", "Veuillez sélectionner un patient.");
+                    return;
+                }
+                int patientId = nomPatientToIdMap.get(nomPatient);
+
                 Prescription p = new Prescription();
                 p.setDate(datePicker.getValue());
                 p.setMedicaments(medicamentsField.getText());
                 p.setRemarques(remarquesArea.getText());
-                p.setPatientId(Integer.parseInt(patientIdField.getText()));
+                p.setPatientId(patientId);
                 p.setMedecinId(medecin.getId());
 
                 PrescriptionController controller = new PrescriptionController();
@@ -52,12 +67,23 @@ public class PrescriptionView {
                 // Réinitialisation
                 medicamentsField.clear();
                 remarquesArea.clear();
-                patientIdField.clear();
+                comboPatients.getSelectionModel().clearSelection();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                showAlert("Erreur", "Impossible d'ajouter l'ordonnance. Vérifiez les champs.");
+                showAlert("Erreur", "Impossible d'ajouter l'ordonnance.");
             }
         });
+
+        retourBtn.setOnAction(e -> {
+            try {
+                DashboardMedecinView dashboard = new DashboardMedecinView(stage, medecin);
+                stage.getScene().setRoot(dashboard.getView());
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+                showAlert("Erreur", "Impossible de retourner au dashboard.");
+            }
+        });
+
 
         GridPane formPane = new GridPane();
         formPane.setHgap(10);
@@ -68,8 +94,8 @@ public class PrescriptionView {
         formPane.add(medicamentsField, 1, 1);
         formPane.add(new Label("Remarques :"), 0, 2);
         formPane.add(remarquesArea, 1, 2);
-        formPane.add(new Label("ID Patient :"), 0, 3);
-        formPane.add(patientIdField, 1, 3);
+        formPane.add(new Label("Patient :"), 0, 3);
+        formPane.add(comboPatients, 1, 3);
         formPane.add(ajouterBtn, 1, 4);
         formPane.setPadding(new Insets(10));
 
@@ -84,23 +110,17 @@ public class PrescriptionView {
         TableColumn<Prescription, String> remarksCol = new TableColumn<>("Remarques");
         remarksCol.setCellValueFactory(cell -> cell.getValue().remarquesProperty());
 
-        TableColumn<Prescription, Number> patientCol = new TableColumn<>("ID Patient");
-        patientCol.setCellValueFactory(cell -> cell.getValue().patientIdProperty());
+        TableColumn<Prescription, Number> patientIdCol = new TableColumn<>("Patient ID");
+        patientIdCol.setCellValueFactory(cell -> cell.getValue().patientIdProperty());
 
-        table.getColumns().addAll(dateCol, medsCol, remarksCol, patientCol);
+        table.getColumns().addAll(dateCol, medsCol, remarksCol, patientIdCol);
 
-        // Charger données
-        try {
-            PrescriptionController controller = new PrescriptionController();
-            List<Prescription> liste = controller.listerPrescriptionsMedecin(medecin.getId());
-            prescriptionData = FXCollections.observableArrayList(liste);
-            table.setItems(prescriptionData);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger les prescriptions.");
-        }
+        PrescriptionController controller = new PrescriptionController();
+		List<Prescription> liste = controller.listerPrescriptionsMedecin(medecin.getId());
+		prescriptionData = FXCollections.observableArrayList(liste);
+		table.setItems(prescriptionData);
 
-        VBox root = new VBox(15, title, formPane, new Label("Ordonnances enregistrées :"), table);
+        VBox root = new VBox(15, title, formPane, new Label("Ordonnances enregistrées :"), table, retourBtn);
         root.setPadding(new Insets(15));
         root.setAlignment(Pos.TOP_CENTER);
 
@@ -108,6 +128,23 @@ public class PrescriptionView {
         stage.setTitle("Ordonnances - Médecin");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void chargerPatients(ComboBox<String> comboBox) {
+        try {
+            Connection conn = DBConnection.getConnection();
+            UtilisateurDAO utilisateurDAO = new UtilisateurDAO(conn);
+            List<Utilisateur> patients = utilisateurDAO.listerPatients();
+
+            for (Utilisateur p : patients) {
+                String nomComplet =  p.getNom();
+                nomPatientToIdMap.put(nomComplet, p.getId());
+                comboBox.getItems().add(nomComplet);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la liste des patients.");
+        }
     }
 
     private void showAlert(String titre, String message) {

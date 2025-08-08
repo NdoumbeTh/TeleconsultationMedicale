@@ -158,13 +158,16 @@ public class Utilisateur {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        
-        Utilisateur that = (Utilisateur) obj;
-        return getEmail() != null ? getEmail().equals(that.getEmail()) : that.getEmail() == null;
+
+        Utilisateur other = (Utilisateur) obj;
+        return getId() == other.getId();  // Comparaison fiable par ID
     }
-    
+
     @Override
     public int hashCode() {
-        return getEmail() != null ? getEmail().hashCode() : 0;
+        return Integer.hashCode(getId());  // Hash par ID
     }
+
+
+
 }
